@@ -5,6 +5,13 @@
   "title": "Resize Image",
   "description": "Resize Image",
   "homepage": "https://github.com/abramvandergeest/resize_image",
+  "settings": [
+    {
+      "name": "aSetting",
+      "type": "string",
+      "required": false
+    }
+  ],
   "input":[
     {
       "name": "file",

@@ -7,9 +7,13 @@ import (
 	"github.com/project-flogo/core/data/coerce"
 )
 
+type Settings struct {
+	ResamplingFilter string `md:"resamplingFilter"`
+}
+
 type Input struct {
 	File       multipart.File `md:"file,required"`
-	MaxDimSize int            `md:"maxDimSize,required"`
+	MaxDimSize int            `md:"maxDimSize"`
 }
 
 func (r *Input) FromMap(values map[string]interface{}) error {

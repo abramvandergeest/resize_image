@@ -24,15 +24,16 @@ func New(ctx activity.InitContext) (activity.Activity, error) {
 		return nil, err
 	}
 
-	ctx.Logger().Debugf("Setting: %s", s.ASetting)
+	ctx.Logger().Debugf("Setting: ResamplingFilter = %s", s.ResamplingFilter)
 
-	act := &Activity{} //add aSetting to instance
+	act := &Activity{settings: s} //add aSetting to instance
 
 	return act, nil
 }
 
 // Activity is an sample Activity that can be used as a base to create a custom activity
 type Activity struct {
+	settings *Settings
 }
 
 // Metadata returns the activity's metadata
@@ -43,26 +44,37 @@ func (a *Activity) Metadata() *activity.Metadata {
 // Eval implements api.Activity.Eval - Logs the Message
 func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 
+	fmt.Println("HERE")
+	fmt.Println(a.settings)
+	var rFilter imaging.ResampleFilter
+	if a.settings.ResamplingFilter == "Lanczos" {
+		rFilter = imaging.Lanczos
+	} else if a.settings.ResamplingFilter == "NearestNeighbor" {
+		rFilter = imaging.NearestNeighbor
+	} else if a.settings.ResamplingFilter == "Linear" {
+		rFilter = imaging.Linear
+	} else if a.settings.ResamplingFilter == "CatmullRom" {
+		rFilter = imaging.CatmullRom
+	} else {
+		rFilter = imaging.Lanczos
+	}
+
 	input := &Input{}
 	err = ctx.GetInputObject(input)
 	if err != nil {
 		return true, err
 	}
 
-	ctx.Logger().Info("Input: %s", input.AnInput)
-
-	output := &Output{AnOutput: input.AnInput}
-	err = ctx.SetOutputObject(output)
+	pic, _, err := image.Decode(input.File)
 	if err != nil {
-		return true, err
-	}
-
-	pic, _, err := image.Decode(f)
-	if err != nil {
-		return nil, fmt.Errorf("Error Decoding file: %v", err)
+		return false, fmt.Errorf("Error Decoding file: %v", err)
 	}
 
 	maxdim := 256
+	if input.MaxDimSize > 0 {
+		maxdim = input.MaxDimSize
+	}
+
 	src := pic.(image.Image)
 	bounds := src.Bounds()
 	w, h := bounds.Max.X, bounds.Max.Y
@@ -75,7 +87,15 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 		w = int(h * bounds.Max.X / bounds.Max.Y)
 	}
 	fmt.Println(w, h)
-	src = imaging.Resize(src, w, h, imaging.Lanczos)
+	src = imaging.Resize(src, w, h, rFilter)
 
-	return src, nil
+	ctx.Logger().Infof("Input: maxDim is = %d", input.MaxDimSize)
+
+	output := &Output{ResizedImage: src}
+	err = ctx.SetOutputObject(output)
+	if err != nil {
+		return true, err
+	}
+
+	return true, nil
 }

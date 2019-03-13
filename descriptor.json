@@ -1,0 +1,25 @@
+{
+  "name": "flogo-resize_image",
+  "type": "flogo:activity",
+  "version": "0.0.1",
+  "title": "Resize Image",
+  "description": "Global Counter Activity",
+  "homepage": "https://github.com/project-flogo/contrib/tree/master/activity/counter",
+  "settings":[
+    {
+      "name": "file",
+      "type": "any",
+      "required": true
+    },
+    {
+      "name": "maxdimsize",
+      "type": "int"
+    }
+  ],
+  "output": [
+    {
+      "name": "value",
+      "type": "object"
+    }
+  ]
+}

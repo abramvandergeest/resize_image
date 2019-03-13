@@ -1,7 +1,6 @@
 package resizeImage
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -35,8 +34,6 @@ func TestEval(t *testing.T) {
 	tc := test.NewActivityContext(act.Metadata())
 
 	tc.SetInputObject(input)
-
-	fmt.Println("Starting Test Eval:")
 
 	done, err := act.Eval(tc)
 	assert.True(t, done)

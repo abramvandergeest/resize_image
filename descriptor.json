@@ -1,24 +1,24 @@
 {
-  "name": "flogo-resize_image",
+  "name": "resizeImage",
   "type": "flogo:activity",
   "version": "0.0.1",
   "title": "Resize Image",
-  "description": "Global Counter Activity",
-  "homepage": "https://github.com/project-flogo/contrib/tree/master/activity/counter",
-  "settings":[
+  "description": "Resize Image",
+  "homepage": "https://github.com/abramvandergeest/resize_image",
+  "input":[
     {
       "name": "file",
       "type": "any",
       "required": true
     },
     {
-      "name": "maxdimsize",
+      "name": "maxDimSize",
       "type": "int"
     }
   ],
   "output": [
     {
-      "name": "value",
+      "name": "resizedImage",
       "type": "object"
     }
   ]

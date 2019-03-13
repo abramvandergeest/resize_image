@@ -1,11 +1,9 @@
-package counter
+package resizeImage
 
 import (
 	"testing"
 
 	"github.com/project-flogo/core/activity"
-	"github.com/project-flogo/core/data/mapper"
-	"github.com/project-flogo/core/data/resolve"
 	"github.com/project-flogo/core/support/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,75 +16,18 @@ func TestRegister(t *testing.T) {
 	assert.NotNil(t, act)
 }
 
-func TestIncrement(t *testing.T) {
+func TestEval(t *testing.T) {
 
-	defer func() {
-		if r := recover(); r != nil {
-			t.Failed()
-			t.Errorf("panic during execution: %v", r)
-		}
-	}()
+	act := &Activity{}
+	tc := test.NewActivityContext(act.Metadata())
+	input := &Input{AnInput: "test"}
+	tc.SetInputObject(input)
 
-	settings := &Settings{CounterName: "test", Op: "increment"}
-	mf := mapper.NewFactory(resolve.GetBasicResolver())
-	iCtx := test.NewActivityInitContext(settings, mf)
-
-	act, err := New(iCtx)
+	done, err := act.Eval(tc)
+	assert.True(t, done)
 	assert.Nil(t, err)
 
-	tc := test.NewActivityContext(act.Metadata())
-
-	act.Eval(tc)
-
-	value := tc.GetOutput(ovValue).(int)
-
-	assert.Equal(t, 1, value)
-}
-
-func TestGet(t *testing.T) {
-
-	settings := &Settings{CounterName: "test", Op: "get"}
-	mf := mapper.NewFactory(resolve.GetBasicResolver())
-	iCtx := test.NewActivityInitContext(settings, mf)
-
-	act, err := New(iCtx)
-	assert.Nil(t, err)
-
-	tc := test.NewActivityContext(act.Metadata())
-
-	c := counters["test"]
-	c.Reset()
-	c.Increment()
-	c.Increment()
-	c.Increment()
-
-	act.Eval(tc)
-
-	value := tc.GetOutput(ovValue).(int)
-
-	assert.Equal(t, 3, value)
-}
-
-func TestReset(t *testing.T) {
-
-	settings := &Settings{CounterName: "test", Op: "reset"}
-	mf := mapper.NewFactory(resolve.GetBasicResolver())
-	iCtx := test.NewActivityInitContext(settings, mf)
-
-	act, err := New(iCtx)
-	assert.Nil(t, err)
-
-	tc := test.NewActivityContext(act.Metadata())
-
-	c := counters["test"]
-	c.Reset()
-	c.Increment()
-	c.Increment()
-	c.Increment()
-
-	act.Eval(tc)
-
-	value := tc.GetOutput(ovValue).(int)
-
-	assert.Equal(t, 0, value)
+	output := &Output{}
+	tc.GetOutputObject(output)
+	assert.Equal(t, "test", output.AnOutput)
 }

@@ -1,96 +1,81 @@
-package counter
+package resizeImage
 
 import (
-	"sync/atomic"
+	"fmt"
+	"image"
 
+	"github.com/disintegration/imaging"
 	"github.com/project-flogo/core/activity"
 	"github.com/project-flogo/core/data/metadata"
 )
 
-const (
-	ovValue = "value"
-)
-
-var counters = make(map[string]*Counter)
-
-type CounterFunc func() uint64
-
-type Settings struct {
-	CounterName string `md:"counterName,required"`
-	Op          string `md:"op,allowed(get,increment,reset)"`
-}
-
-type Output struct {
-	Value string `md:"value"`
-}
-
 func init() {
-	activity.Register(&Activity{}, New)
+	activity.Register(&Activity{}) //activity.Register(&Activity{}, New) to create instances using factory method 'New'
 }
 
-var activityMd = activity.ToMetadata(&Settings{}, &Output{})
+var activityMd = activity.ToMetadata(&Settings{}, &Input{}, &Output{})
 
-// Activity is a Counter Activity implementation
-type Activity struct {
-	invoke CounterFunc
-}
-
+//New optional factory method, should be used if one activity instance per configuration is desired
 func New(ctx activity.InitContext) (activity.Activity, error) {
+
 	s := &Settings{}
 	err := metadata.MapToStruct(ctx.Settings(), s, true)
 	if err != nil {
 		return nil, err
 	}
 
-	act := &Activity{}
+	ctx.Logger().Debugf("Setting: %s", s.ASetting)
 
-	counter, exists := counters[s.CounterName]
-
-	if !exists {
-		//log creating counter
-		counter = &Counter{val: 0}
-		counters[s.CounterName] = counter
-	}
-
-	switch s.Op {
-	case "increment":
-		act.invoke = counter.Increment
-	case "reset":
-		act.invoke = counter.Reset
-	default:
-		act.invoke = counter.Get
-	}
+	act := &Activity{} //add aSetting to instance
 
 	return act, nil
 }
 
-// Metadata implements activity.Activity.Metadata
+// Activity is an sample Activity that can be used as a base to create a custom activity
+type Activity struct {
+}
+
+// Metadata returns the activity's metadata
 func (a *Activity) Metadata() *activity.Metadata {
 	return activityMd
 }
 
-// Eval implements activity.Activity.Eval
-func (a *Activity) Eval(context activity.Context) (done bool, err error) {
-	val := a.invoke()
+// Eval implements api.Activity.Eval - Logs the Message
+func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 
-	context.SetOutput(ovValue, int(val))
+	input := &Input{}
+	err = ctx.GetInputObject(input)
+	if err != nil {
+		return true, err
+	}
 
-	return true, nil
-}
+	ctx.Logger().Info("Input: %s", input.AnInput)
 
-type Counter struct {
-	val uint64
-}
+	output := &Output{AnOutput: input.AnInput}
+	err = ctx.SetOutputObject(output)
+	if err != nil {
+		return true, err
+	}
 
-func (c *Counter) Get() uint64 {
-	return atomic.LoadUint64(&c.val)
-}
+	pic, _, err := image.Decode(f)
+	if err != nil {
+		return nil, fmt.Errorf("Error Decoding file: %v", err)
+	}
 
-func (c *Counter) Increment() uint64 {
-	return atomic.AddUint64(&c.val, 1)
-}
+	maxdim := 256
+	src := pic.(image.Image)
+	bounds := src.Bounds()
+	w, h := bounds.Max.X, bounds.Max.Y
+	if w >= h {
+		w = maxdim
+		h = int(w * bounds.Max.Y / bounds.Max.X)
 
-func (c *Counter) Reset() uint64 {
-	atomic.StoreUint64(&c.val, 0)
-	return 0
+	} else {
+		h = maxdim
+		w = int(h * bounds.Max.X / bounds.Max.Y)
+	}
+	fmt.Println(w, h)
+	src = imaging.Resize(src, w, h, imaging.Lanczos)
+
+	return src, nil
 }

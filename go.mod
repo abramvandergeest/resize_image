@@ -1,4 +1,4 @@
-module github.com/abramvandergeest/resize_image
+module github.com/abramvandergeest/resizeimage
 
 go 1.11
 

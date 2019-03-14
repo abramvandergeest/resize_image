@@ -1,6 +1,7 @@
 package resizeImage
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 
@@ -65,7 +66,7 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 		return true, err
 	}
 
-	pic, _, err := image.Decode(input.File)
+	pic, _, err := image.Decode(bytes.NewReader(input.File.([]byte)))
 	if err != nil {
 		return false, fmt.Errorf("Error Decoding file: %v", err)
 	}

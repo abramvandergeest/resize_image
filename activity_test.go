@@ -1,6 +1,7 @@
 package resizeImage
 
 import (
+	"bufio"
 	"log"
 	"os"
 	"testing"
@@ -25,12 +26,24 @@ func TestEval(t *testing.T) {
 		log.Fatal("trouble loading test file")
 	}
 
+	defer f.Close()
+
+	fileInfo, _ := f.Stat()
+	var size int64 = fileInfo.Size()
+	bytes := make([]byte, size)
+
+	// read file into bytes
+	buffer := bufio.NewReader(f)
+	_, err = buffer.Read(bytes)
+
+	//THIS TEST IS BROKEN CONVERT FILE TO []byte
+
 	settings := &Settings{ResamplingFilter: "NearestNeighbor"}
 
 	iCtx := test.NewActivityInitContext(settings, nil)
 	act, err := New(iCtx)
 	assert.Nil(t, err)
-	input := &Input{MaxDimSize: 256, File: f}
+	input := &Input{MaxDimSize: 256, File: bytes}
 	tc := test.NewActivityContext(act.Metadata())
 
 	tc.SetInputObject(input)

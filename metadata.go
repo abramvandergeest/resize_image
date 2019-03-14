@@ -2,7 +2,6 @@ package resizeImage
 
 import (
 	"image"
-	"mime/multipart"
 
 	"github.com/project-flogo/core/data/coerce"
 )
@@ -12,13 +11,13 @@ type Settings struct {
 }
 
 type Input struct {
-	File       multipart.File `md:"file,required"`
-	MaxDimSize int            `md:"maxDimSize"`
+	File       interface{} `md:"file,required"`
+	MaxDimSize int         `md:"maxDimSize"`
 }
 
 func (r *Input) FromMap(values map[string]interface{}) error {
 	intVal, _ := coerce.ToInt(values["maxDimSize"])
-	r.File = values["file"].(multipart.File)
+	r.File = values["file"].([]byte)
 	r.MaxDimSize = intVal
 	return nil
 }

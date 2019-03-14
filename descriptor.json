@@ -1,5 +1,5 @@
 {
-  "name": "resizeImage",
+  "name": "resizeimage",
   "type": "flogo:activity",
   "version": "0.0.1",
   "title": "Resize Image",
@@ -7,7 +7,7 @@
   "homepage": "https://github.com/abramvandergeest/resize_image",
   "settings": [
     {
-      "name": "aSetting",
+      "name": "ResamplingFilter",
       "type": "string",
       "required": false
     }

@@ -1,4 +1,4 @@
-package resizeImage
+package resizeimage
 
 import (
 	"bytes"

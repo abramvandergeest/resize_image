@@ -11,8 +11,8 @@ type Settings struct {
 }
 
 type Input struct {
-	File       interface{} `md:"file,required"`
-	MaxDimSize int         `md:"maxDimSize"`
+	File       []byte `md:"file,required"`
+	MaxDimSize int    `md:"maxDimSize"`
 }
 
 func (r *Input) FromMap(values map[string]interface{}) error {

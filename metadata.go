@@ -11,7 +11,7 @@ type Settings struct {
 }
 
 type Input struct {
-	File       interface{} `md:"file,required"`
+	File       []byte `md:"file,required"`
 	MaxDimSize int         `md:"maxDimSize"`
 	X int         `md:"x"`
 	Y int         `md:"y"`

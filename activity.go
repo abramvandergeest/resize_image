@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	activity.Register(&Activity{}) //activity.Register(&Activity{}, New) to create instances using factory method 'New'
+	activity.Register(&Activity{}, New) //activity.Register(&Activity{}, New) to create instances using factory method 'New'
 }
 
 var activityMd = activity.ToMetadata(&Settings{}, &Input{}, &Output{})
@@ -45,7 +45,7 @@ func (a *Activity) Metadata() *activity.Metadata {
 // Eval implements api.Activity.Eval - Logs the Message
 func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 
-	fmt.Println("Resampling Filter: ",a.settings)
+	ctx.Logger().Infof("Resampling Filter: ",a.settings)
 	var rFilter imaging.ResampleFilter
 	if a.settings.ResamplingFilter == "Lanczos" {
 		rFilter = imaging.Lanczos
@@ -65,7 +65,7 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 		return true, err
 	}
 
-	pic, _, err := image.Decode(bytes.NewReader(input.File.([]byte)))
+	pic, _, err := image.Decode(bytes.NewReader(input.File))
 	if err != nil {
 		return false, fmt.Errorf("Error Decoding file: %v", err)
 	}

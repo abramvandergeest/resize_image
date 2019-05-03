@@ -45,8 +45,7 @@ func (a *Activity) Metadata() *activity.Metadata {
 // Eval implements api.Activity.Eval - Logs the Message
 func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 
-	fmt.Println("HERE")
-	fmt.Println(a.settings)
+	fmt.Println("Resampling Filter: ",a.settings)
 	var rFilter imaging.ResampleFilter
 	if a.settings.ResamplingFilter == "Lanczos" {
 		rFilter = imaging.Lanczos
@@ -71,26 +70,36 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 		return false, fmt.Errorf("Error Decoding file: %v", err)
 	}
 
-	maxdim := 256
-	if input.MaxDimSize > 0 {
-		maxdim = input.MaxDimSize
-	}
-
 	src := pic.(image.Image)
 	bounds := src.Bounds()
 	w, h := bounds.Max.X, bounds.Max.Y
-	if w >= h {
-		w = maxdim
-		h = int(w * bounds.Max.Y / bounds.Max.X)
-
-	} else {
-		h = maxdim
-		w = int(h * bounds.Max.X / bounds.Max.Y)
+    
+	if input.X <=0 && input.Y <=0 && input.MaxDimSize <=0 {
+		ctx.Logger().Infof("WARNING: no resizing done due to lack of dimensions to resize to")
+	} else if input.MaxDimSize <= 0 &&((input.X >0 && input.Y <=0) || (input.X <=0 && input.Y>0)) {
+		ctx.Logger().Infof("WARNING: no resizing done due to lacking X or Y size data")
+	} else if input.X >0 && input.Y >0 && input.MaxDimSize <= 0{
+		w=input.X
+		h=input.Y
+	} else if input.X >0 && input.Y >0 && input.MaxDimSize > 0{
+		w=input.X
+		h=input.Y
+		ctx.Logger().Infof("WARNING: have numbers for max dimension, x, and y - reshaping to x and y info.")
+	} else if input.MaxDimSize > 0 && input.X <=0 && input.Y <=0{
+		
+		maxdim := input.MaxDimSize
+		if w >= h {
+			w = maxdim
+			h = int(w * bounds.Max.Y / bounds.Max.X)
+	
+		} else {
+			h = maxdim
+			w = int(h * bounds.Max.X / bounds.Max.Y)
+		}
 	}
-	fmt.Println(w, h)
-	src = imaging.Resize(src, w, h, rFilter)
 
-	ctx.Logger().Infof("Input: maxDim is = %d", input.MaxDimSize)
+	ctx.Logger().Infof("dims to be resized to: ",w, h)
+	src = imaging.Resize(src, w, h, rFilter)
 
 	output := &Output{ResizedImage: src}
 	err = ctx.SetOutputObject(output)

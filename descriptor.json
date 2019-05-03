@@ -20,7 +20,18 @@
     },
     {
       "name": "maxDimSize",
-      "type": "int"
+      "type": "int",
+      "required": false
+    },
+    {
+      "name": "x",
+      "type": "int",
+      "required": false
+    },
+    {
+      "name": "y",
+      "type": "int",
+      "required": false
     }
   ],
   "output": [

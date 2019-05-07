@@ -45,7 +45,7 @@ func (a *Activity) Metadata() *activity.Metadata {
 // Eval implements api.Activity.Eval - Logs the Message
 func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 
-	ctx.Logger().Infof("Resampling Filter: ",a.settings)
+	ctx.Logger().Infof("Resampling Filter: %s",a.settings.ResamplingFilter)
 	var rFilter imaging.ResampleFilter
 	if a.settings.ResamplingFilter == "Lanczos" {
 		rFilter = imaging.Lanczos
@@ -81,10 +81,12 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 	} else if input.X >0 && input.Y >0 && input.MaxDimSize <= 0{
 		w=input.X
 		h=input.Y
+		ctx.Logger().Infof("Resizing to the x and y values given: %dx%d",w,h)
 	} else if input.X >0 && input.Y >0 && input.MaxDimSize > 0{
 		w=input.X
 		h=input.Y
 		ctx.Logger().Infof("WARNING: have numbers for max dimension, x, and y - reshaping to x and y info.")
+		ctx.Logger().Infof("Resizing to the x and y values given: %dx%d",w,h)
 	} else if input.MaxDimSize > 0 && input.X <=0 && input.Y <=0{
 		
 		maxdim := input.MaxDimSize
@@ -96,9 +98,10 @@ func (a *Activity) Eval(ctx activity.Context) (done bool, err error) {
 			h = maxdim
 			w = int(h * bounds.Max.X / bounds.Max.Y)
 		}
+		ctx.Logger().Infof("Resizing to the imaxDim value given: %d",maxdim)
 	}
 
-	ctx.Logger().Infof("dims to be resized to: ",w, h)
+	ctx.Logger().Infof("dims to be resized to: %dx%d ",w, h)
 	src = imaging.Resize(src, w, h, rFilter)
 
 	output := &Output{ResizedImage: src}
